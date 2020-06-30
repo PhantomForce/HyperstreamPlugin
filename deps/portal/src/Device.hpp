@@ -102,7 +102,7 @@ namespace portal
 
         int connect(uint16_t port, std::shared_ptr<ChannelDelegate> channelDelegate, int attempts);
 
-        int send(char* buffer, uint32_t size);
+        int send(std::vector<char> buffer);
 
         ~Device();
 

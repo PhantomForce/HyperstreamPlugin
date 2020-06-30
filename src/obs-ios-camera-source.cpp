@@ -268,36 +268,40 @@ static bool refresh_devices(obs_properties_t *props, obs_property_t *p, void *da
     return true;
 }
 
+static int sendData(int type, char* payload, int payloadSize, portal::Device::shared_ptr device) {
+    portal::PortalFrame frame;
+    frame.version = 0;
+    frame.type = type;
+    frame.tag = 0;
+
+    std::vector<char> packet(sizeof(portal::PortalFrame) + payloadSize);
+    memcpy(packet.data(), reinterpret_cast<char*>(&frame), sizeof(portal::PortalFrame));
+    if (payload && payloadSize > 0) {
+        memcpy(packet.data() + sizeof(portal::PortalFrame), payload, payloadSize);
+    }
+    device->send(packet);
+}
+
+const int PREV_FILTER_PACKET_TYPE = 104;
 static bool prev_filter(obs_properties_t *props, obs_property_t *p, void *data) {
     blog(LOG_INFO, "prev filter");
+    auto cameraInput = reinterpret_cast<IOSCameraInput* >(data);
+    auto device = cameraInput->portal._device;
+    sendData(PREV_FILTER_PACKET_TYPE, NULL, 0, device);
 }
 
+const int NEXT_FILTER_PACKET_TYPE = 105;
 static bool next_filter(obs_properties_t *props, obs_property_t *p, void *data) {
     blog(LOG_INFO, "next filter");
-
-    portal::PortalFrame frame;
-
-    frame.version = 0;
-    frame.type = 106;
-    frame.tag = 0;
-    frame.payloadSize = 0;
-
-    Float32 intensity = 0.5;
-
-    char* packetPtr = reinterpret_cast<char*>(&frame);
-    std::vector<char> packetBuffer(packetPtr, packetPtr + sizeof(portal::PortalFrame));
-
-    char* payloadPtr = reinterpret_cast<char*>(&intensity);
-    std::vector<char> payloadBuffer(payloadPtr, payloadPtr + sizeof(Float32));
-
-    packetBuffer.insert(packetBuffer.end(), payloadBuffer.begin(), payloadBuffer.end());
-    
-    auto cameraInput = reinterpret_cast<IOSCameraInput*>(data);
-    cameraInput->portal._device->send(&packetBuffer[0], packetBuffer.size());
-
-    // delete(payloadBuffer);
-    // delete(packetBuffer);
+    auto cameraInput = reinterpret_cast<IOSCameraInput* >(data);
+    auto device = cameraInput->portal._device;
+    sendData(NEXT_FILTER_PACKET_TYPE, NULL, 0, device);
 }
+
+static bool update_filter(obs_properties_t *props, obs_property_t *p, void *data) {
+
+}
+
 
 static bool reconnect_to_device(obs_properties_t *props, obs_property_t *p, void *data)
 {
@@ -367,7 +371,9 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
     obs_properties_add_button(ppts, "setting_button_connect_to_device", "Reconnect to Device", reconnect_to_device);
     obs_properties_add_button(ppts, "setting_prev_filter", "Prev Filter", prev_filter);
     obs_properties_add_button(ppts, "setting_next_filter", "Next Filter", next_filter);
-    obs_properties_add_float_slider(ppts, "intensity", "Intensity", 0.0, 1.0, 0.02);
+
+    // obs_property_t* filter = obs_properties_add_float_slider(ppts, "intensity", "Intensity", 0.0, 1.0, 0.02);
+    // obs_property_set_modified_callback(filter, &update_filter);
 
     obs_property_t* latency_modes = obs_properties_add_list(ppts, SETTING_PROP_LATENCY, obs_module_text("OBSIOSCamera.Settings.Latency"), OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
 

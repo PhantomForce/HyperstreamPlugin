@@ -96,10 +96,9 @@ namespace portal
         }
     }
 
-    int Channel::send(char* buffer, uint32_t size)
-    {
+    int Channel::send(std::vector<char> buffer) {
         uint32_t numSent = 0;
-        return usbmuxd_send(conn, buffer, size, &numSent);
+        return usbmuxd_send(conn, &buffer[0], buffer.size(), &numSent);
     }
 
     void Channel::simpleDataPacketProtocolDelegateDidProcessPacket(std::vector<char> packet, int type, int tag)

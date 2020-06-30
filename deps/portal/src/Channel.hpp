@@ -45,7 +45,7 @@ namespace portal
         }
 
         void close();
-        int send(char* buffer, uint32_t size);
+        int send(std::vector<char> buffer);
 
         void simpleDataPacketProtocolDelegateDidProcessPacket(std::vector<char> packet, int type, int tag);
 
