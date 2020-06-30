@@ -98,6 +98,9 @@ void VideoToolboxDecoder::processPacketItem(PacketItem *packetItem)
 
     int naluType = (packet[4] & 0x1F);
 
+    // blog(LOG_INFO, "NALU Type %d", naluType);
+    // blog(LOG_INFO, "packet size %d", packet.size());
+
     if (naluType == 7 || naluType == 8) {
 
         // NALU is the SPS Parameter

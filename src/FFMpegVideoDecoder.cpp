@@ -87,6 +87,11 @@ void FFMpegVideoDecoder::processPacketItem(PacketItem *packetItem)
 
     if (packetItem->getType() == 101) {
 
+        int naluType = (packet[4] & 0x1F);
+        // blog(LOG_INFO, "NALU Type %d", naluType);
+        // blog(LOG_INFO, "packet size %d", packet.size());
+
+
         bool got_output;
         bool success = ffmpeg_decode_video(video_decoder, data, packet.size(), &ts,
                                            &video_frame, &got_output);
