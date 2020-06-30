@@ -274,6 +274,19 @@ static bool prev_filter(obs_properties_t *props, obs_property_t *p, void *data) 
 
 static bool next_filter(obs_properties_t *props, obs_property_t *p, void *data) {
     blog(LOG_INFO, "next filter");
+
+    portal::PortalFrame frame;
+
+    frame.version = 0;
+    frame.type = 104;
+    frame.tag = 0;
+    frame.payloadSize = 0;
+
+    char* buffer = reinterpret_cast<char*>(&frame);
+    
+    auto cameraInput = reinterpret_cast<IOSCameraInput*>(data);
+
+    cameraInput->portal._device->send(buffer, sizeof(portal::PortalFrame));
 }
 
 static bool reconnect_to_device(obs_properties_t *props, obs_property_t *p, void *data)
