@@ -93,6 +93,11 @@ namespace portal
         return retval;
     }
 
+    int Device::send(char* buffer, uint32_t size)
+    {
+        return connectedChannel->send(buffer, size);
+    }
+
     void Device::disconnect()
     {
         if (isConnected() == false) {

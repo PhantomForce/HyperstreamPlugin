@@ -78,6 +78,7 @@ namespace portal
 
             int ret = usbmuxd_recv_timeout(conn, (char *)&buffer, numberOfBytesToAskFor, &numberOfBytesReceived, 10);
 
+
             if (ret == 0)
             {
                 if (numberOfBytesReceived > 0)
@@ -93,6 +94,12 @@ namespace portal
                 running = false;
             }
         }
+    }
+
+    int Channel::send(char* buffer, uint32_t size)
+    {
+        uint32_t numSent = 0;
+        return usbmuxd_send(conn, buffer, size, &numSent);
     }
 
     void Channel::simpleDataPacketProtocolDelegateDidProcessPacket(std::vector<char> packet, int type, int tag)
