@@ -278,15 +278,25 @@ static bool next_filter(obs_properties_t *props, obs_property_t *p, void *data) 
     portal::PortalFrame frame;
 
     frame.version = 0;
-    frame.type = 104;
+    frame.type = 106;
     frame.tag = 0;
     frame.payloadSize = 0;
 
-    char* buffer = reinterpret_cast<char*>(&frame);
+    Float32 intensity = 0.5;
+
+    char* packetPtr = reinterpret_cast<char*>(&frame);
+    std::vector<char> packetBuffer(packetPtr, packetPtr + sizeof(portal::PortalFrame));
+
+    char* payloadPtr = reinterpret_cast<char*>(&intensity);
+    std::vector<char> payloadBuffer(payloadPtr, payloadPtr + sizeof(Float32));
+
+    packetBuffer.insert(packetBuffer.end(), payloadBuffer.begin(), payloadBuffer.end());
     
     auto cameraInput = reinterpret_cast<IOSCameraInput*>(data);
+    cameraInput->portal._device->send(&packetBuffer[0], packetBuffer.size());
 
-    cameraInput->portal._device->send(buffer, sizeof(portal::PortalFrame));
+    // delete(payloadBuffer);
+    // delete(packetBuffer);
 }
 
 static bool reconnect_to_device(obs_properties_t *props, obs_property_t *p, void *data)
