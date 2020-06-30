@@ -306,6 +306,9 @@ DecompressionSessionDecodeFrameCallback(void *decompressionOutputRefCon,
                                         CMTime presentationTimeStamp,
                                         CMTime presentationDuration)
 {
+    UNUSED_PARAMETER(sourceFrameRefCon);
+    UNUSED_PARAMETER(presentationTimeStamp);
+    UNUSED_PARAMETER(presentationDuration);
 
     VideoToolboxDecoder* decoder = static_cast<VideoToolboxDecoder*>(decompressionOutputRefCon);
 

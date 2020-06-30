@@ -37,6 +37,7 @@
 #define SETTING_PROP_LATENCY_LOW 1
 
 #define SETTING_PROP_HARDWARE_DECODER "setting_use_hw_decoder"
+#define SETTING_PROP_FILTER_INTENSITY "filter-intensity"
 
 class IOSCameraInput: public portal::PortalDelegate
 {
@@ -57,6 +58,9 @@ public:
 #endif
     FFMpegVideoDecoder ffmpegVideoDecoder;
     FFMpegAudioDecoder audioDecoder;
+
+    // settings
+    Float32 intensity;
 
     IOSCameraInput(obs_source_t *source_, obs_data_t *settings)
     : source(source_), settings(settings), portal(this)
@@ -112,7 +116,6 @@ public:
         auto device_uuid = obs_data_get_string(settings, SETTING_DEVICE_UUID);
 
         blog(LOG_INFO, "Loaded Settings: Connecting to device");
-
         connectToDevice(device_uuid, false);
     }
 
@@ -230,6 +233,7 @@ public:
         }
     }
 };
+static IOSCameraInput *AppContext;
 
 #pragma mark - Settings Config
 
@@ -268,7 +272,7 @@ static bool refresh_devices(obs_properties_t *props, obs_property_t *p, void *da
     return true;
 }
 
-static int sendData(int type, char* payload, int payloadSize, portal::Device::shared_ptr device) {
+static int sendData(int type, char *payload, int payloadSize, portal::Device::shared_ptr device) {
     portal::PortalFrame frame;
     frame.version = 0;
     frame.type = type;
@@ -283,34 +287,56 @@ static int sendData(int type, char* payload, int payloadSize, portal::Device::sh
 }
 
 const int PREV_FILTER_PACKET_TYPE = 104;
-static bool prev_filter(obs_properties_t *props, obs_property_t *p, void *data) {
+static bool prev_filter(obs_properties_t*, obs_property_t*, void *data) {
     blog(LOG_INFO, "prev filter");
     auto cameraInput = reinterpret_cast<IOSCameraInput* >(data);
     auto device = cameraInput->portal._device;
     sendData(PREV_FILTER_PACKET_TYPE, NULL, 0, device);
+    return true;
 }
 
 const int NEXT_FILTER_PACKET_TYPE = 105;
-static bool next_filter(obs_properties_t *props, obs_property_t *p, void *data) {
+static bool next_filter(obs_properties_t*, obs_property_t*, void *data) {
     blog(LOG_INFO, "next filter");
     auto cameraInput = reinterpret_cast<IOSCameraInput* >(data);
     auto device = cameraInput->portal._device;
     sendData(NEXT_FILTER_PACKET_TYPE, NULL, 0, device);
+    return true;
 }
 
-static bool update_filter(obs_properties_t *props, obs_property_t *p, void *data) {
-
+static bool update_device(obs_properties_t*, obs_property_t*, obs_data *settings) {
+    auto uuid = obs_data_get_string(settings, SETTING_DEVICE_UUID);
+    AppContext->connectToDevice(uuid, false);
+    obs_source_output_video(AppContext->source, NULL);
+    blog(LOG_INFO, "device value: %s", uuid);
+    return true;
 }
 
+static bool update_latency(obs_properties_t*, obs_property_t*, obs_data *settings) {
+    const bool is_unbuffered =
+        (obs_data_get_int(settings, SETTING_PROP_LATENCY) == SETTING_PROP_LATENCY_LOW);
+    obs_source_set_async_unbuffered(AppContext->source, is_unbuffered);
+    blog(LOG_INFO, "latency value: %d", is_unbuffered);
+    return true;
+}
 
-static bool reconnect_to_device(obs_properties_t *props, obs_property_t *p, void *data)
+#ifdef __APPLE__
+static bool update_hardware_decoding(obs_properties_t*, obs_property_t*, obs_data *settings) {
+    bool useHardwareDecoder = obs_data_get_bool(settings, SETTING_PROP_HARDWARE_DECODER);
+    if (useHardwareDecoder) {
+        AppContext->videoDecoder = &AppContext->videoToolboxVideoDecoder;
+    } else {
+        AppContext->videoDecoder = &AppContext->ffmpegVideoDecoder;
+    }
+    blog(LOG_INFO, "hardware decoding value: %d", useHardwareDecoder);
+    return true;
+}
+#endif
+
+static bool reconnect_to_device(obs_properties_t*, obs_property_t*, void *data)
 {
-    UNUSED_PARAMETER(props);
-    UNUSED_PARAMETER(p);
-
     auto cameraInput =  reinterpret_cast<IOSCameraInput* >(data);
     cameraInput->reconnectToDevice();
-
     return false;
 }
 
@@ -334,6 +360,7 @@ static void *CreateIOSCameraInput(obs_data_t *settings, obs_source_t *source)
         blog(LOG_ERROR, "Could not create device '%s': %s", obs_source_get_name(source), error);
     }
 
+    AppContext = cameraInput;
     return cameraInput;
 }
 
@@ -363,6 +390,8 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
                                                        "iOS Device",
                                                        OBS_COMBO_TYPE_LIST,
                                                        OBS_COMBO_FORMAT_STRING);
+    obs_property_set_modified_callback(dev_list, update_device);
+
     obs_property_list_add_string(dev_list, "", "");
 
     refresh_devices(ppts, dev_list, data);
@@ -372,21 +401,22 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
     obs_properties_add_button(ppts, "setting_prev_filter", "Prev Filter", prev_filter);
     obs_properties_add_button(ppts, "setting_next_filter", "Next Filter", next_filter);
 
-    // obs_property_t* filter = obs_properties_add_float_slider(ppts, "intensity", "Intensity", 0.0, 1.0, 0.02);
-    // obs_property_set_modified_callback(filter, &update_filter);
+    obs_property_t* filter = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_INTENSITY, "Intensity", 0.0, 1.0, 0.02);
+    // obs_property_set_modified_callback(filter, update_filter);
 
     obs_property_t* latency_modes = obs_properties_add_list(ppts, SETTING_PROP_LATENCY, obs_module_text("OBSIOSCamera.Settings.Latency"), OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
-
     obs_property_list_add_int(latency_modes,
         obs_module_text("OBSIOSCamera.Settings.Latency.Normal"),
         SETTING_PROP_LATENCY_NORMAL);
     obs_property_list_add_int(latency_modes,
         obs_module_text("OBSIOSCamera.Settings.Latency.Low"),
         SETTING_PROP_LATENCY_LOW);
+    obs_property_set_modified_callback(latency_modes, update_latency);
 
 #ifdef __APPLE__
-    obs_properties_add_bool(ppts, SETTING_PROP_HARDWARE_DECODER,
+    obs_property_t* hardware_decoding = obs_properties_add_bool(ppts, SETTING_PROP_HARDWARE_DECODER,
         obs_module_text("OBSIOSCamera.Settings.UseHardwareDecoder"));
+    obs_property_set_modified_callback(hardware_decoding, update_hardware_decoding);
 #endif
 
     return ppts;
@@ -408,31 +438,16 @@ static void SaveIOSCameraInput(void *data, obs_data_t *settings)
     UNUSED_PARAMETER(settings);
 }
 
-static void UpdateIOSCameraInput(void *data, obs_data_t *settings)
-{
-    IOSCameraInput *input = reinterpret_cast<IOSCameraInput*>(data);
+static void UpdateIOSCameraInput(void *data, obs_data_t *settings) {
 
-    // Clear the video frame when a setting changes
-    obs_source_output_video(input->source, NULL);
-
-    // Connect to the device
-    auto uuid = obs_data_get_string(settings, SETTING_DEVICE_UUID);
-    input->connectToDevice(uuid, false);
-
-    const bool is_unbuffered =
-        (obs_data_get_int(settings, SETTING_PROP_LATENCY) == SETTING_PROP_LATENCY_LOW);
-    obs_source_set_async_unbuffered(input->source, is_unbuffered);
-
-#ifdef __APPLE__
-    bool useHardwareDecoder = obs_data_get_bool(settings, SETTING_PROP_HARDWARE_DECODER);
-
-    if (useHardwareDecoder) {
-        input->videoDecoder = &input->videoToolboxVideoDecoder;
-    } else {
-        input->videoDecoder = &input->ffmpegVideoDecoder;
+    // update intensity
+    Float32 intensity = (Float32)obs_data_get_double(settings, SETTING_PROP_FILTER_INTENSITY);
+    if (AppContext->intensity != intensity) {
+        auto device = AppContext->portal._device;
+        AppContext->intensity = intensity;
+        char* payload = reinterpret_cast<char*>(&intensity);
+        sendData(106, payload, sizeof(Float32), device);
     }
-#endif
-
 }
 
 void RegisterIOSCameraSource()
