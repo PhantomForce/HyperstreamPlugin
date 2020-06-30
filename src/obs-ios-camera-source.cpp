@@ -268,6 +268,14 @@ static bool refresh_devices(obs_properties_t *props, obs_property_t *p, void *da
     return true;
 }
 
+static bool prev_filter(obs_properties_t *props, obs_property_t *p, void *data) {
+    blog(LOG_INFO, "prev filter");
+}
+
+static bool next_filter(obs_properties_t *props, obs_property_t *p, void *data) {
+    blog(LOG_INFO, "next filter");
+}
+
 static bool reconnect_to_device(obs_properties_t *props, obs_property_t *p, void *data)
 {
     UNUSED_PARAMETER(props);
@@ -334,6 +342,9 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
 
     obs_properties_add_button(ppts, "setting_refresh_devices", "Refresh Devices", refresh_devices);
     obs_properties_add_button(ppts, "setting_button_connect_to_device", "Reconnect to Device", reconnect_to_device);
+    obs_properties_add_button(ppts, "setting_prev_filter", "Prev Filter", prev_filter);
+    obs_properties_add_button(ppts, "setting_next_filter", "Next Filter", next_filter);
+    obs_properties_add_float_slider(ppts, "intensity", "Intensity", 0.0, 1.0, 0.02);
 
     obs_property_t* latency_modes = obs_properties_add_list(ppts, SETTING_PROP_LATENCY, obs_module_text("OBSIOSCamera.Settings.Latency"), OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
 
