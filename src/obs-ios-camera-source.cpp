@@ -401,7 +401,7 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
     obs_properties_add_button(ppts, "setting_prev_filter", "Prev Filter", prev_filter);
     obs_properties_add_button(ppts, "setting_next_filter", "Next Filter", next_filter);
 
-    obs_property_t* filter = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_INTENSITY, "Intensity", 0.0, 1.0, 0.02);
+    obs_property_t* filter = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_INTENSITY, "Intensity", 0.0, 1.0, 0.01);
     // obs_property_set_modified_callback(filter, update_filter);
 
     obs_property_t* latency_modes = obs_properties_add_list(ppts, SETTING_PROP_LATENCY, obs_module_text("OBSIOSCamera.Settings.Latency"), OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
