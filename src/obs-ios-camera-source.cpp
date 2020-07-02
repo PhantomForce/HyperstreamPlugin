@@ -99,6 +99,10 @@ public:
 
     inline ~IOSCameraInput()
     {
+        auto device = portal._device;
+        if (device) {
+            device->disconnect();
+        }
 
     }
 
@@ -273,12 +277,13 @@ static bool refresh_devices(obs_properties_t *props, obs_property_t *p, void *da
 }
 
 static int sendData(int type, char *payload, int payloadSize, portal::Device::shared_ptr device) {
+    if (!device) { return -1; }
     portal::PortalFrame frame;
     frame.version = 0;
     frame.type = type;
     frame.tag = 0;
 
-    std::vector<char> packet(sizeof(portal::PortalFrame) + payloadSize);
+    std::vector<char> packet(sizeof(portal::PortalFrame ) + payloadSize);
     memcpy(packet.data(), reinterpret_cast<char*>(&frame), sizeof(portal::PortalFrame));
     if (payload && payloadSize > 0) {
         memcpy(packet.data() + sizeof(portal::PortalFrame), payload, payloadSize);
@@ -289,27 +294,30 @@ static int sendData(int type, char *payload, int payloadSize, portal::Device::sh
 const int PREV_FILTER_PACKET_TYPE = 104;
 static bool prev_filter(obs_properties_t*, obs_property_t*, void *data) {
     blog(LOG_INFO, "prev filter");
-    auto cameraInput = reinterpret_cast<IOSCameraInput* >(data);
-    auto device = cameraInput->portal._device;
-    sendData(PREV_FILTER_PACKET_TYPE, NULL, 0, device);
+    auto device = AppContext->portal._device;
+    if (device) {
+        sendData(PREV_FILTER_PACKET_TYPE, NULL, 0, device);
+    }
     return true;
 }
 
 const int NEXT_FILTER_PACKET_TYPE = 105;
 static bool next_filter(obs_properties_t*, obs_property_t*, void *data) {
     blog(LOG_INFO, "next filter");
-    auto cameraInput = reinterpret_cast<IOSCameraInput* >(data);
-    auto device = cameraInput->portal._device;
-    sendData(NEXT_FILTER_PACKET_TYPE, NULL, 0, device);
+    auto device = AppContext->portal._device;
+    if (device) {
+        sendData(NEXT_FILTER_PACKET_TYPE, NULL, 0, device);
+    }
     return true;
 }
 
 static bool update_device(obs_properties_t*, obs_property_t*, obs_data *settings) {
     auto uuid = obs_data_get_string(settings, SETTING_DEVICE_UUID);
-    AppContext->connectToDevice(uuid, false);
-    obs_source_output_video(AppContext->source, NULL);
     blog(LOG_INFO, "device value: %s", uuid);
+    AppContext->connectToDevice(uuid, false);
+    // obs_source_output_video(AppContext->source, NULL);
     return true;
+    // return AppContext->portal._device != NULL;
 }
 
 static bool update_latency(obs_properties_t*, obs_property_t*, obs_data *settings) {
@@ -350,17 +358,15 @@ static const char *GetIOSCameraInputName(void *)
 static void *CreateIOSCameraInput(obs_data_t *settings, obs_source_t *source)
 {
     IOSCameraInput *cameraInput = nullptr;
-
     try
     {
         cameraInput = new IOSCameraInput(source, settings);
+        AppContext = cameraInput;
     }
     catch (const char *error)
     {
         blog(LOG_ERROR, "Could not create device '%s': %s", obs_source_get_name(source), error);
     }
-
-    AppContext = cameraInput;
     return cameraInput;
 }
 
@@ -371,6 +377,13 @@ static void DestroyIOSCameraInput(void *data)
 
 static void DeactivateIOSCameraInput(void *data)
 {
+    if (AppContext) {
+        auto device = AppContext->portal._device;
+        if (device) {
+            // device->disconnect();
+        }
+    }
+
     auto cameraInput =  reinterpret_cast<IOSCameraInput*>(data);
     cameraInput->deactivate();
 }
@@ -439,14 +452,16 @@ static void SaveIOSCameraInput(void *data, obs_data_t *settings)
 }
 
 static void UpdateIOSCameraInput(void *data, obs_data_t *settings) {
-
-    // update intensity
+    if (!AppContext) { return; }
     Float32 intensity = (Float32)obs_data_get_double(settings, SETTING_PROP_FILTER_INTENSITY);
     if (AppContext->intensity != intensity) {
-        auto device = AppContext->portal._device;
         AppContext->intensity = intensity;
-        char* payload = reinterpret_cast<char*>(&intensity);
-        sendData(106, payload, sizeof(Float32), device);
+
+        auto device = AppContext->portal._device;
+        if (device) {
+            char* payload = reinterpret_cast<char*>(&intensity);
+            sendData(106, payload, sizeof(Float32), device);
+        }
     }
 }
 
