@@ -311,6 +311,15 @@ static bool next_filter(obs_properties_t*, obs_property_t*, void *data) {
     return true;
 }
 
+const int WILDCARD_PACKET_TYPE = 107;
+static bool wildcard(obs_properties_t*, obs_property_t*, void *data) {
+    blog(LOG_INFO, "wildcard");
+    auto cameraInput = reinterpret_cast<IOSCameraInput* >(data);
+    auto device = cameraInput->portal._device;
+    sendData(WILDCARD_PACKET_TYPE, NULL, 0, device);
+    return true;
+}
+
 static bool update_device(obs_properties_t*, obs_property_t*, obs_data *settings) {
     auto uuid = obs_data_get_string(settings, SETTING_DEVICE_UUID);
     blog(LOG_INFO, "device value: %s", uuid);
@@ -413,6 +422,7 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
     obs_properties_add_button(ppts, "setting_button_connect_to_device", "Reconnect to Device", reconnect_to_device);
     obs_properties_add_button(ppts, "setting_prev_filter", "Prev Filter", prev_filter);
     obs_properties_add_button(ppts, "setting_next_filter", "Next Filter", next_filter);
+    obs_properties_add_button(ppts, "setting_wildcard", "Wildcard", wildcard);
 
     obs_property_t* filter = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_INTENSITY, "Intensity", 0.0, 1.0, 0.01);
     // obs_property_set_modified_callback(filter, update_filter);
