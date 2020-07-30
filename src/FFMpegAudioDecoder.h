@@ -1,5 +1,5 @@
 /*
- obs-ios-camera-source
+ hyperstream-source
  Copyright (C) 2018    Will Townsend <will@townsend.io>
  
  This program is free software; you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 #include <chrono>
 
-#include "obs-ios-camera-source.h"
+#include "hyperstream-source.h"
 #include "VideoDecoder.h"
 #include "ffmpeg-decode.h"
 #include "Queue.hpp"

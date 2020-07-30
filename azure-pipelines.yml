@@ -73,7 +73,7 @@ jobs:
           solution: '$(OBSPath)\build64\obs-studio.sln'
   
       - script: ./CI/prepare-windows.cmd
-        displayName: 'CMake obs-ios-camera-source'
+        displayName: 'CMake hyperstream-source'
         env:
           build_config: $(build_config)
           QTDIR32: $(QTDIR32)
@@ -81,19 +81,19 @@ jobs:
           OBSPath: $(OBSPath)
   
       - task: MSBuild@1
-        displayName: 'Build obs-ios-camera-source 32-bit'
+        displayName: 'Build hyperstream-source 32-bit'
         inputs:
           msbuildArguments: '/m /p:Configuration=$(build_config)'
-          solution: '.\build32\obs-ios-camera-source.sln'
+          solution: '.\build32\hyperstream-source.sln'
   
       - task: MSBuild@1
-        displayName: 'Build obs-ios-camera-source 64-bit'
+        displayName: 'Build hyperstream-source 64-bit'
         inputs:
           msbuildArguments: '/m /p:Configuration=$(build_config)'
-          solution: '.\build64\obs-ios-camera-source.sln'
+          solution: '.\build64\hyperstream-source.sln'
   
       - script: ./CI/package-windows.cmd
-        displayName: 'Package obs-ios-camera-source'
+        displayName: 'Package hyperstream-source'
   
       - task: PublishBuildArtifacts@1
         displayName: 'Upload package artifacts'
@@ -115,7 +115,7 @@ jobs:
         displayName: 'Build OBS'
   
       - script: ./CI/build-macos.sh
-        displayName: 'Build obs-ios-camera-source'
+        displayName: 'Build hyperstream-source'
   
       - task: InstallAppleCertificate@1
         displayName: 'Install release signing certificates'
@@ -125,7 +125,7 @@ jobs:
           certPwd: $(secrets.macOS.certificatesImportPassword)
   
       - script: ./CI/package-macos.sh
-        displayName: 'Package obs-ios-camera-source'
+        displayName: 'Package hyperstream-source'
         env:
           RELEASE_MODE: $(isReleaseMode)
           CODE_SIGNING_IDENTITY: $(secrets.macOS.codeSigningIdentity)

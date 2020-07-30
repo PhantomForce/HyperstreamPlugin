@@ -3,7 +3,7 @@
 OSTYPE=$(uname)
 
 if [ "${OSTYPE}" != "Darwin" ]; then
-    echo "[obs-ios-camera-plugin - Error] macOS obs-studio build script can be run on Darwin-type OS only."
+    echo "[hyperstream-plugin - Error] macOS obs-studio build script can be run on Darwin-type OS only."
     exit 1
 fi
 
@@ -11,29 +11,29 @@ HAS_CMAKE=$(type cmake 2>/dev/null)
 HAS_GIT=$(type git 2>/dev/null)
 
 if [ "${HAS_CMAKE}" = "" ]; then
-    echo "[obs-ios-camera-plugin - Error] CMake not installed - please run 'install-dependencies-macos.sh' first."
+    echo "[hyperstream-plugin - Error] CMake not installed - please run 'install-dependencies-macos.sh' first."
     exit 1
 fi
 
 if [ "${HAS_GIT}" = "" ]; then
-    echo "[obs-ios-camera-plugin - Error] Git not installed - please install Xcode developer tools or via Homebrew."
+    echo "[hyperstream-plugin - Error] Git not installed - please install Xcode developer tools or via Homebrew."
     exit 1
 fi
 
-echo "[obs-ios-camera-plugin] Downloading and unpacking OBS dependencies"
+echo "[hyperstream-plugin] Downloading and unpacking OBS dependencies"
 wget --quiet --retry-connrefused --waitretry=1 https://obs-nightly.s3.amazonaws.com/osx-deps-2018-08-09.tar.gz
 tar -xf ./osx-deps-2018-08-09.tar.gz -C /tmp
 
 # Build obs-studio
 cd ..
-echo "[obs-ios-camera-plugin] Cloning obs-studio from GitHub.."
+echo "[hyperstream-plugin] Cloning obs-studio from GitHub.."
 git clone https://github.com/obsproject/obs-studio
 cd obs-studio
 # OBSLatestTag=$(git describe --tags --abbrev=0)
 # git checkout $OBSLatestTag
 git checkout 24.0.6
 mkdir build && cd build
-echo "[obs-ios-camera-plugin] Building obs-studio.."
+echo "[hyperstream-plugin] Building obs-studio.."
 cmake .. \
 	-DCMAKE_OSX_DEPLOYMENT_TARGET=10.11 \
 	-DDISABLE_PLUGINS=true \

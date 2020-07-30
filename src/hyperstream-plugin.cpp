@@ -1,5 +1,5 @@
 /*
- obs-ios-camera-source
+ hyperstream-source
  Copyright (C) 2018    Will Townsend <will@townsend.io>
 
  This program is free software; you can redistribute it and/or modify
@@ -20,7 +20,7 @@
 #include <obs.hpp>
 
 OBS_DECLARE_MODULE()
-OBS_MODULE_USE_DEFAULT_LOCALE("obs-ios-camera-plugin", "en-US")
+OBS_MODULE_USE_DEFAULT_LOCALE("hyperstream-plugin", "en-US")
 
 #define IOS_CAMERA_PLUGIN_VERSION "2.6.1"
 

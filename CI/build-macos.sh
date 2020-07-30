@@ -3,20 +3,20 @@
 OSTYPE=$(uname)
 
 if [ "${OSTYPE}" != "Darwin" ]; then
-    echo "[obs-ios-camera-plugin - Error] macOS build script can be run on Darwin-type OS only."
+    echo "[hyperstream-plugin - Error] macOS build script can be run on Darwin-type OS only."
     exit 1
 fi
 
 HAS_CMAKE=$(type cmake 2>/dev/null)
 
 if [ "${HAS_CMAKE}" = "" ]; then
-    echo "[obs-ios-camera-plugin - Error] CMake not installed - please run 'install-dependencies-macos.sh' first."
+    echo "[hyperstream-plugin - Error] CMake not installed - please run 'install-dependencies-macos.sh' first."
     exit 1
 fi
 
-echo "[obs-ios-camera-plugin] Building 'obs-ios-camera-plugin' for macOS."
+echo "[hyperstream-plugin] Building 'hyperstream-plugin' for macOS."
 
-mkdir build && cd build
+mkdir -p build && cd build
 cmake .. \
   -DCMAKE_OSX_DEPLOYMENT_TARGET=10.11 \
 	-DQTDIR=/usr/local/opt/qt \

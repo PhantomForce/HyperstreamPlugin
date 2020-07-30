@@ -1,5 +1,5 @@
 /*
-obs-ios-camera-source
+hyperstream-source
 Copyright (C) 2018	Will Townsend <will@townsend.io>
 
 This program is free software; you can redistribute it and/or modify
@@ -16,11 +16,11 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-#ifndef OBSIOSCAMERASOURCE_H
-#define OBSIOSCAMERASOURCE_H
+#ifndef HyperstreamSOURCE_H
+#define HyperstreamSOURCE_H
 
 #include <obs-module.h>
 
-#define blog(level, msg, ...) blog(level, "[obs-ios-camera-plugin] " msg, ##__VA_ARGS__)
+#define blog(level, msg, ...) blog(level, "[hyperstream-plugin] " msg, ##__VA_ARGS__)
 
-#endif // OBSIOSCAMERASOURCE_H
+#endif // HyperstreamSOURCE_H

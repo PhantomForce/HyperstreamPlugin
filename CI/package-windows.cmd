@@ -6,7 +6,7 @@ set /p PackageVersion=<package-version.txt
 del package-version.txt
 
 REM Package ZIP archive
-7z a "obs-ios-camera-source-%PackageVersion%-Windows.zip" "..\release\*"
+7z a "hyperstream-source-%PackageVersion%-Windows.zip" "..\release\*"
 
 REM Build installer
-iscc ..\installer\installer.iss /O. /F"obs-ios-camera-source-%PackageVersion%-Windows-Installer"
+iscc ..\installer\installer.iss /O. /F"hyperstream-source-%PackageVersion%-Windows-Installer"

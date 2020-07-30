@@ -1,5 +1,5 @@
 /*
- obs-ios-camera-source
+ hyperstream-source
  Copyright (C) 2018    Will Townsend <will@townsend.io>
 
  This program is free software; you can redistribute it and/or modify
@@ -28,7 +28,7 @@
     #include "VideoToolboxVideoDecoder.h"
 #endif
 
-#define TEXT_INPUT_NAME obs_module_text("OBSIOSCamera.Title")
+#define TEXT_INPUT_NAME obs_module_text("Hyperstream.Title")
 
 #define SETTING_DEVICE_UUID "setting_device_uuid"
 #define SETTING_DEVICE_UUID_NONE_VALUE "null"
@@ -407,6 +407,8 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
 {
     UNUSED_PARAMETER(data);
     obs_properties_t *ppts = obs_properties_create();
+    
+    obs_properties_add_button(ppts, "setting_refresh_devices", "Refresh Devices", refresh_devices);
 
     obs_property_t *dev_list = obs_properties_add_list(ppts, SETTING_DEVICE_UUID,
                                                        "iOS Device",
@@ -418,8 +420,7 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
 
     refresh_devices(ppts, dev_list, data);
 
-    obs_properties_add_button(ppts, "setting_refresh_devices", "Refresh Devices", refresh_devices);
-    obs_properties_add_button(ppts, "setting_button_connect_to_device", "Reconnect to Device", reconnect_to_device);
+    obs_properties_add_button(ppts, "setting_button_connect_to_device", "Connect to Device", reconnect_to_device);
     obs_properties_add_button(ppts, "setting_prev_filter", "Prev Filter", prev_filter);
     obs_properties_add_button(ppts, "setting_next_filter", "Next Filter", next_filter);
     obs_properties_add_button(ppts, "setting_wildcard", "Wildcard", wildcard);
@@ -427,18 +428,18 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
     obs_property_t* filter = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_INTENSITY, "Intensity", 0.0, 1.0, 0.01);
     // obs_property_set_modified_callback(filter, update_filter);
 
-    obs_property_t* latency_modes = obs_properties_add_list(ppts, SETTING_PROP_LATENCY, obs_module_text("OBSIOSCamera.Settings.Latency"), OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
+    obs_property_t* latency_modes = obs_properties_add_list(ppts, SETTING_PROP_LATENCY, obs_module_text("Hyperstream.Settings.Latency"), OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
     obs_property_list_add_int(latency_modes,
-        obs_module_text("OBSIOSCamera.Settings.Latency.Normal"),
+        obs_module_text("Hyperstream.Settings.Latency.Normal"),
         SETTING_PROP_LATENCY_NORMAL);
     obs_property_list_add_int(latency_modes,
-        obs_module_text("OBSIOSCamera.Settings.Latency.Low"),
+        obs_module_text("Hyperstream.Settings.Latency.Low"),
         SETTING_PROP_LATENCY_LOW);
     obs_property_set_modified_callback(latency_modes, update_latency);
 
 #ifdef __APPLE__
     obs_property_t* hardware_decoding = obs_properties_add_bool(ppts, SETTING_PROP_HARDWARE_DECODER,
-        obs_module_text("OBSIOSCamera.Settings.UseHardwareDecoder"));
+        obs_module_text("Hyperstream.Settings.UseHardwareDecoder"));
     obs_property_set_modified_callback(hardware_decoding, update_hardware_decoding);
 #endif
 
