@@ -56,7 +56,7 @@ if [[ "$RELEASE_MODE" == "True" ]]; then
 	zip -r ./release/$FILENAME.zip ./release/$FILENAME
 	UPLOAD_RESULT=$(xcrun altool \
 		--notarize-app \
-		--primary-bundle-id "io.loftlabs.hyperstream-source.pkg" \
+		--primary-bundle-id "phantomforce.hyperstream-source.pkg" \
 		--username "$AC_USERNAME" \
 		--password "$AC_PASSWORD" \
 		--asc-provider "$AC_PROVIDER_SHORTNAME" \
