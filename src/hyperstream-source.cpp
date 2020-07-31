@@ -407,8 +407,9 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
 {
     UNUSED_PARAMETER(data);
     obs_properties_t *ppts = obs_properties_create();
-    
+
     obs_properties_add_button(ppts, "setting_refresh_devices", "Refresh Devices", refresh_devices);
+    obs_properties_add_button(ppts, "setting_button_connect_to_device", "Connect to Device", reconnect_to_device);
 
     obs_property_t *dev_list = obs_properties_add_list(ppts, SETTING_DEVICE_UUID,
                                                        "iOS Device",
@@ -420,7 +421,6 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
 
     refresh_devices(ppts, dev_list, data);
 
-    obs_properties_add_button(ppts, "setting_button_connect_to_device", "Connect to Device", reconnect_to_device);
     obs_properties_add_button(ppts, "setting_prev_filter", "Prev Filter", prev_filter);
     obs_properties_add_button(ppts, "setting_next_filter", "Next Filter", next_filter);
     obs_properties_add_button(ppts, "setting_wildcard", "Wildcard", wildcard);
