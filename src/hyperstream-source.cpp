@@ -431,7 +431,7 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
     obs_properties_add_button(ppts, "setting_next_filter", "Next Filter", next_filter);
     obs_properties_add_button(ppts, "setting_wildcard", "Wildcard", wildcard);
 
-    obs_property_t* filter = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_INTENSITY, "Intensity", 0.0, 1.0, 0.01);
+    obs_property_t* filter = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_INTENSITY, "Mod", 0.0, 1.0, 0.01);
     obs_property_t* mix = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_MIX, "Mix", 0.0, 1.0, 0.01);
     // obs_property_set_modified_callback(filter, update_filter);
 
