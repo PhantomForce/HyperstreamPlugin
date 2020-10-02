@@ -22,13 +22,13 @@
 OBS_DECLARE_MODULE()
 OBS_MODULE_USE_DEFAULT_LOCALE("hyperstream-plugin", "en-US")
 
-#define IOS_CAMERA_PLUGIN_VERSION "2.6.1"
+#define HYPERSTREAM_PLUGIN_VERSION "1.0.0"
 
 extern void RegisterIOSCameraSource();
 
 bool obs_module_load(void)
 {
-    blog(LOG_INFO, "Loading iOS Camera Plugin (version %s)", IOS_CAMERA_PLUGIN_VERSION);
+    blog(LOG_INFO, "Loading Hyperstream Plugin (version %s)", HYPERSTREAM_PLUGIN_VERSION);
     RegisterIOSCameraSource();
     return true;
 }

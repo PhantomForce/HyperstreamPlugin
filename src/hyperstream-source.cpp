@@ -431,8 +431,8 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
     obs_properties_add_button(ppts, "setting_next_filter", "Next Filter", next_filter);
     obs_properties_add_button(ppts, "setting_wildcard", "Wildcard", wildcard);
 
-    obs_property_t* filter = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_INTENSITY, "Mod", 0.0, 1.0, 0.01);
     obs_property_t* mix = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_MIX, "Mix", 0.0, 1.0, 0.01);
+    obs_property_t* filter = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_INTENSITY, "Mod", 0.0, 1.0, 0.01);
     // obs_property_set_modified_callback(filter, update_filter);
 
     obs_property_t* latency_modes = obs_properties_add_list(ppts, SETTING_PROP_LATENCY, obs_module_text("Hyperstream.Settings.Latency"), OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
@@ -496,7 +496,7 @@ static void UpdateIOSCameraInput(void *data, obs_data_t *settings) {
 void RegisterIOSCameraSource()
 {
     obs_source_info info = {};
-    info.id              = "ios-camera-source";
+    info.id              = "hyperstream-source";
     info.type            = OBS_SOURCE_TYPE_INPUT;
     info.output_flags    = OBS_SOURCE_ASYNC_VIDEO | OBS_SOURCE_AUDIO;
     info.get_name        = GetIOSCameraInputName;
