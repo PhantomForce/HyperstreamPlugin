@@ -4,6 +4,15 @@ set -e
 
 OSTYPE=$(uname)
 
+RELEASE_MODE=True
+
+CODE_SIGNING_IDENTITY="Apple Development: Sam Loeschen (35PNV9MG9L)"
+
+AC_USERNAME="samloeschen@gmail.com"
+AC_PASSWORD="kcrn-zcgj-hyac-bdln"
+AC_PROVIDER_SHORTNAME="S92VEDVZS6"
+INSTALLER_SIGNING_IDENTITY="Developer ID Installer: Sam Loeschen (S92VEDVZS6)"
+
 if [ "${OSTYPE}" != "Darwin" ]; then
     echo "[hyperstream-plugin - Error] macOS package script can be run on Darwin-type OS only."
     exit 1
@@ -33,7 +42,8 @@ otool -L ./build/hyperstream-source.so
 
 if [[ "$RELEASE_MODE" == "True" ]]; then
 	echo "-- Signing plugin binary: hyperstream-source.so"
-	codesign --sign "$CODE_SIGNING_IDENTITY" ./build/hyperstream-source.so
+	# codesign --sign "$CODE_SIGNING_IDENTITY" ./build/hyperstream-source.so
+	codesign -s "$CODE_SIGNING_IDENTITY" -o runtime ./build/hyperstream-source.so
 else
 	echo "-- Skipped plugin codesigning"
 fi
