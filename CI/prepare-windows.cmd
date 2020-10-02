@@ -1,6 +1,10 @@
 mkdir build32
 mkdir build64
 
+set QTDIR32="C:\qt5.10.1\msvc2017"
+set QTDIR64="C:\qt5.10.1\msvc2017_64"
+set OBSPath="C:\obs-studio"
+
 cd build32
 cmake -G "Visual Studio 16 2019" -A Win32 -DCMAKE_SYSTEM_VERSION=10.0 -DQTDIR="%QTDIR32%" -Dw32-pthreads_DIR="%OBSPath%\build32\deps\w32-pthreads" -DW32_PTHREADS_LIB="%OBSPath%\build32\deps\w32-pthreads\%build_config%\w32-pthreads.lib" -DLibObs_DIR="%OBSPath%\build32\libobs" -DLIBOBS_INCLUDE_DIR="%OBSPath%\libobs" -DLIBOBS_LIB="%OBSPath%\build32\libobs\%build_config%\obs.lib" -DOBS_FRONTEND_LIB="%OBSPath%\build32\UI\obs-frontend-api\%build_config%\obs-frontend-api.lib" ..
 cd ..\build64

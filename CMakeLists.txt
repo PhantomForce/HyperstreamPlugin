@@ -240,6 +240,7 @@ add_library(hyperstream-source MODULE
 #find_package(FFmpeg REQUIRED COMPONENTS avcodec avutil)
 
 include_directories( 
+	${LIBOBS_INCLUDE_DIR}
 	"${LIBOBS_INCLUDE_DIR}/../UI/obs-frontend-api"
 	${FFMPEG_INCLUDE_DIRS}
 )
@@ -255,7 +256,7 @@ endif()
 
 
 target_link_libraries(hyperstream-source 
-	libobs
+	${LIBOBS_LIB}
 	portal
 	${FFMPEG_LIBRARIES}
 )

@@ -60,7 +60,7 @@ public:
     FFMpegAudioDecoder audioDecoder;
 
     // settings
-    Float32 intensity;
+    float intensity;
 
     IOSCameraInput(obs_source_t *source_, obs_data_t *settings)
     : source(source_), settings(settings), portal(this)
@@ -276,27 +276,30 @@ static bool refresh_devices(obs_properties_t *props, obs_property_t *p, void *da
     return true;
 }
 
-static int sendData(int type, char *payload, int payloadSize, portal::Device::shared_ptr device) {
-    if (!device) { return -1; }
+
+static int sendData(int type, char* payload, int payloadSize, portal::Device& device) {
     portal::PortalFrame frame;
     frame.version = 0;
     frame.type = type;
     frame.tag = 0;
 
-    std::vector<char> packet(sizeof(portal::PortalFrame ) + payloadSize);
+    if (!device.isConnected()) { return -1; }
+
+    std::vector<char> packet(sizeof(portal::PortalFrame) + payloadSize);
     memcpy(packet.data(), reinterpret_cast<char*>(&frame), sizeof(portal::PortalFrame));
     if (payload && payloadSize > 0) {
         memcpy(packet.data() + sizeof(portal::PortalFrame), payload, payloadSize);
     }
-    device->send(packet);
+    device.send(packet);
 }
+
 
 const int PREV_FILTER_PACKET_TYPE = 104;
 static bool prev_filter(obs_properties_t*, obs_property_t*, void *data) {
     blog(LOG_INFO, "prev filter");
     auto device = AppContext->portal._device;
     if (device) {
-        sendData(PREV_FILTER_PACKET_TYPE, NULL, 0, device);
+        sendData(PREV_FILTER_PACKET_TYPE, NULL, 0, *device);
     }
     return true;
 }
@@ -306,7 +309,7 @@ static bool next_filter(obs_properties_t*, obs_property_t*, void *data) {
     blog(LOG_INFO, "next filter");
     auto device = AppContext->portal._device;
     if (device) {
-        sendData(NEXT_FILTER_PACKET_TYPE, NULL, 0, device);
+        sendData(NEXT_FILTER_PACKET_TYPE, NULL, 0, *device);
     }
     return true;
 }
@@ -316,7 +319,8 @@ static bool wildcard(obs_properties_t*, obs_property_t*, void *data) {
     blog(LOG_INFO, "wildcard");
     auto cameraInput = reinterpret_cast<IOSCameraInput* >(data);
     auto device = cameraInput->portal._device;
-    sendData(WILDCARD_PACKET_TYPE, NULL, 0, device);
+    if (!device) { return false; }
+    sendData(WILDCARD_PACKET_TYPE, NULL, 0, *device);
     return true;
 }
 
@@ -464,14 +468,14 @@ static void SaveIOSCameraInput(void *data, obs_data_t *settings)
 
 static void UpdateIOSCameraInput(void *data, obs_data_t *settings) {
     if (!AppContext) { return; }
-    Float32 intensity = (Float32)obs_data_get_double(settings, SETTING_PROP_FILTER_INTENSITY);
+    float intensity = (float)obs_data_get_double(settings, SETTING_PROP_FILTER_INTENSITY);
     if (AppContext->intensity != intensity) {
         AppContext->intensity = intensity;
 
         auto device = AppContext->portal._device;
         if (device) {
             char* payload = reinterpret_cast<char*>(&intensity);
-            sendData(106, payload, sizeof(Float32), device);
+            sendData(106, payload, sizeof(float), *device);
         }
     }
 }

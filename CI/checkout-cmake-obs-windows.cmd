@@ -17,6 +17,7 @@ echo Latest tag post-pull: %OBSLatestTagPostPull%
 REM Set up the build flag as undefined.
 set "BuildOBS="
 
+set OBSPath "C:\obs-studio"
 REM Check the last tag successfully built by CI.
 if exist "%OBSPath%\obs-studio-last-tag-built.txt" (
 	set /p OBSLastTagBuilt=<"%OBSPath%\obs-studio-last-tag-built.txt"
@@ -24,10 +25,15 @@ if exist "%OBSPath%\obs-studio-last-tag-built.txt" (
 	set OBSLastTagBuilt=0
 )
 
+if exist %OBSPath% (
+	echo EXIST
+) else (
+	echo NOT FOUND
+)
 REM If obs-studio directory exists, run git pull and get the latest tag number.
 if exist %OBSPath% (
 	echo obs-studio directory exists
-	echo   Updating tag info
+	echo  Updating tag info
 	cd /D %OBSPath%
 	git describe --tags --abbrev=0 --exclude="*-rc*" > "%OBSPath%\latest-obs-studio-tag-pre-pull.txt"
 	set /p OBSLatestTagPrePull=<"%OBSPath%\latest-obs-studio-tag-pre-pull.txt"
@@ -38,6 +44,7 @@ if exist %OBSPath% (
 	set /p OBSLatestTag=<"%OBSPath%\latest-obs-studio-tag-post-pull.txt"
 	echo %OBSLatestTagPostPull%> "%OBSPath%\latest-obs-studio-tag.txt"
 )
+
 
 REM Check the obs-studio tags for mismatches.
 REM If a new tag was pulled, set the build flag.
@@ -66,6 +73,7 @@ if not exist %OBSPath% (
 	set /p OBSLatestTag=<"%OBSPath%\obs-studio-latest-tag.txt"
 	set BuildOBS=true
 )
+
 
 REM If the needed obs-studio libs for this build_config do not exist,
 REM set the build flag.
