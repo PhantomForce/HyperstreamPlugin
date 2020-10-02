@@ -38,6 +38,7 @@
 
 #define SETTING_PROP_HARDWARE_DECODER "setting_use_hw_decoder"
 #define SETTING_PROP_FILTER_INTENSITY "filter-intensity"
+#define SETTING_PROP_FILTER_MIX "mix"
 
 class IOSCameraInput: public portal::PortalDelegate
 {
@@ -61,6 +62,7 @@ public:
 
     // settings
     float intensity;
+    float mix;
 
     IOSCameraInput(obs_source_t *source_, obs_data_t *settings)
     : source(source_), settings(settings), portal(this)
@@ -430,6 +432,7 @@ static obs_properties_t *GetIOSCameraProperties(void *data)
     obs_properties_add_button(ppts, "setting_wildcard", "Wildcard", wildcard);
 
     obs_property_t* filter = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_INTENSITY, "Intensity", 0.0, 1.0, 0.01);
+    obs_property_t* mix = obs_properties_add_float_slider(ppts, SETTING_PROP_FILTER_MIX, "Mix", 0.0, 1.0, 0.01);
     // obs_property_set_modified_callback(filter, update_filter);
 
     obs_property_t* latency_modes = obs_properties_add_list(ppts, SETTING_PROP_LATENCY, obs_module_text("Hyperstream.Settings.Latency"), OBS_COMBO_TYPE_LIST, OBS_COMBO_FORMAT_INT);
@@ -476,6 +479,16 @@ static void UpdateIOSCameraInput(void *data, obs_data_t *settings) {
         if (device) {
             char* payload = reinterpret_cast<char*>(&intensity);
             sendData(106, payload, sizeof(float), *device);
+        }
+    }
+
+    float mix = (float)obs_data_get_double(settings, SETTING_PROP_FILTER_MIX);
+    if (AppContext->mix != mix) {
+        AppContext->mix = mix;
+        auto device = AppContext->portal._device;
+        if (device) {
+            char* payload = reinterpret_cast<char*>(&mix);
+            sendData(109, payload, sizeof(float), *device);
         }
     }
 }
